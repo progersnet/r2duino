@@ -5,6 +5,7 @@
 // Choose library version:
 
 #define MCUFRIEND
+//#define LCDWIKI // Considerably slower than MCUFRIEND
 
 // I find it easier to define the limits of the logic display this way, and then
 // derive the pixel locations from there.  It makes it easier if I need to shift
@@ -16,6 +17,7 @@
 #define PANEL_BOTTOM 265
 #define PANEL_WIDTH (PANEL_RIGHT - PANEL_LEFT)
 #define PANEL_HEIGHT (PANEL_BOTTOM - PANEL_TOP)
+#define PIXEL_RADIUS 8
 
 ////////////////////////////////////////////////////////
 
@@ -25,14 +27,29 @@
 #include <MCUFRIEND_kbv.h>
 MCUFRIEND_kbv screen;
 static void drawPixel(LogicPixel *pixel, uint16_t color) {
-  screen.fillCircle(pixel->x, pixel->y, 8, color);
+  screen.fillCircle(pixel->x, pixel->y, PIXEL_RADIUS, color);
 }
 static inline void setupScreen() {
   uint16_t ID = screen.readID();
   screen.begin(ID);
   screen.fillScreen(RGB565_BLACK);
-
   screen.drawRect(PANEL_LEFT, PANEL_TOP, PANEL_WIDTH, PANEL_HEIGHT, RGB565_WHITE);
+}
+#endif
+
+#ifdef LCDWIKI
+#include <LCDWIKI_GUI.h>
+#include <LCDWIKI_KBV.h>
+LCDWIKI_KBV screen(ILI9486,A3,A2,A1,A0,A4);
+static void drawPixel(LogicPixel *pixel, uint16_t color) {
+  screen.Set_Draw_color(RGB565_RED_PART(color), RGB565_GREEN_PART(color), RGB565_BLUE_PART(color));
+  screen.Fill_Circle(pixel->x, pixel->y, PIXEL_RADIUS);
+}
+static inline void setupScreen() {
+  screen.Init_LCD();
+  screen.Fill_Screen(RGB565_BLACK);
+  screen.Set_Draw_color(255,255,255); // white
+  screen.Draw_Rectangle(PANEL_LEFT, PANEL_TOP, PANEL_RIGHT, PANEL_BOTTOM);
 }
 #endif
 
