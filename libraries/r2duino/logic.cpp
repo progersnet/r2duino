@@ -24,9 +24,9 @@ LogicPanel::LogicPanel(uint16_t key_colors[], uint8_t num_key_colors,
   
   // Start with the first key color and extract its red, green, blue components:
   uint16_t key_color = key_colors[0];
-  uint8_t prev_red   = RED_PART(key_color);
-  uint8_t prev_green = GREEN_PART(key_color);
-  uint8_t prev_blue  = BLUE_PART(key_color);
+  uint8_t prev_red   = RGB565_RED_PART(key_color);
+  uint8_t prev_green = RGB565_GREEN_PART(key_color);
+  uint8_t prev_blue  = RGB565_BLUE_PART(key_color);
   
   // Save this first key color:
   _colors[color_index++] = key_color;
@@ -36,9 +36,9 @@ LogicPanel::LogicPanel(uint16_t key_colors[], uint8_t num_key_colors,
   for (uint8_t k = 1; k < num_key_colors; k++) {
     // Get the next key color and extract its red, green, blue components:
     key_color = key_colors[k];
-    uint8_t next_red   = RED_PART(key_color);
-    uint8_t next_green = GREEN_PART(key_color);
-    uint8_t next_blue  = BLUE_PART(key_color);
+    uint8_t next_red   = RGB565_RED_PART(key_color);
+    uint8_t next_green = RGB565_GREEN_PART(key_color);
+    uint8_t next_blue  = RGB565_BLUE_PART(key_color);
     
     // Create the "inbetween" colors:
     for (uint8_t t = 1; t <= num_transitions; t++) {

@@ -2,33 +2,46 @@
 // Copyright (C) 2020 Peter Rogers.  All rights reserved.
 //
 
-#include <logic.h>
+// Choose library version:
 
-#include <MCUFRIEND_kbv.h>
-
-
-MCUFRIEND_kbv screen;
-
-static void drawPixel(LogicPixel *pixel, uint16_t color) {
-  screen.fillCircle(pixel->x, pixel->y, 8, color);
-}
-
+#define MCUFRIEND
 
 // I find it easier to define the limits of the logic display this way, and then
 // derive the pixel locations from there.  It makes it easier if I need to shift
 // the whole display slightly:
 
-#define LEFT 50
-#define RIGHT 270
-#define TOP 100
-#define BOTTOM 265
-#define WIDTH (RIGHT - LEFT)
-#define HEIGHT (BOTTOM - TOP)
+#define PANEL_LEFT 50
+#define PANEL_RIGHT 270
+#define PANEL_TOP 100
+#define PANEL_BOTTOM 265
+#define PANEL_WIDTH (PANEL_RIGHT - PANEL_LEFT)
+#define PANEL_HEIGHT (PANEL_BOTTOM - PANEL_TOP)
+
+////////////////////////////////////////////////////////
+
+#include <logic.h>
+
+#ifdef MCUFRIEND
+#include <MCUFRIEND_kbv.h>
+MCUFRIEND_kbv screen;
+static void drawPixel(LogicPixel *pixel, uint16_t color) {
+  screen.fillCircle(pixel->x, pixel->y, 8, color);
+}
+static inline void setupScreen() {
+  uint16_t ID = screen.readID();
+  screen.begin(ID);
+  screen.fillScreen(RGB565_BLACK);
+
+  screen.drawRect(PANEL_LEFT, PANEL_TOP, PANEL_WIDTH, PANEL_HEIGHT, RGB565_WHITE);
+}
+#endif
+
+////////////////////////////////////////////////////////
 
 // This useful macro allows me to use fractions of the visible area to define my
 // pixel locations:
 
-#define LP(x,y) LogicPixel((LEFT+WIDTH*x),(TOP+HEIGHT*y))
+#define LP(x,y) LogicPixel((PANEL_LEFT+PANEL_WIDTH*x),(PANEL_TOP+PANEL_HEIGHT*y))
 
 // Start by identifying the location of all the LogicPixels, and the "key" colors
 // to use in the rotation:
@@ -42,8 +55,8 @@ static LogicPixel pixels[] = {
 };
 
 static uint16_t key_colors[] = {
-  TFT_BLACK, 0x0010, TFT_BLUE, TFT_WHITE  
-//  TFT_GREEN, RGB565(RED_MAX/2,GREEN_MAX,0), RGB565(RED_MAX,3*GREEN_MAX/4,0), TFT_RED
+  RGB565_BLACK, RGB565_NAVY, RGB565_BLUE, RGB565_WHITE  
+//  RGB565_GREEN, RGB565_GREENYELLOW, RGB565_ORANGE, RGB565_RED
 };
 
 // Then we use these to create the LogicPanel:
@@ -56,11 +69,7 @@ LogicPanel panel(key_colors, sizeof(key_colors)/sizeof(uint16_t), // Key colors 
 ////////////////////////////////////////////////////////
 
 void setup(void) {
-  uint16_t ID = screen.readID();
-  screen.begin(ID);
-  screen.fillScreen(TFT_BLACK);
-
-  screen.drawRect(LEFT, TOP, WIDTH, HEIGHT, TFT_WHITE);
+  setupScreen();
 
   panel.setup();
 }
