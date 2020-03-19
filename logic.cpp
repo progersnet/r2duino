@@ -4,12 +4,6 @@
 
 #include "logic.h"
 
-#define RED_PART(rgb)   ( ((rgb) & 0xF800) >> 11 )
-#define GREEN_PART(rgb) ( ((rgb) & 0x07E0) >>  5 )
-#define BLUE_PART(rgb)  ( ((rgb) & 0x001F)       )
-
-#define RGB565(r,g,b) ( ((r)<<11) | ((g)<<5) | (b) )
-
 LogicPanel::LogicPanel(uint16_t key_colors[], uint8_t num_key_colors,
                        uint8_t num_transitions,
                        LogicPixel pixels[], uint16_t num_pixels,

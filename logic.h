@@ -7,6 +7,18 @@
 
 #include <r2duino.h>
 
+
+#define RED_MAX   0x1f
+#define GREEN_MAX 0x3f
+#define BLUE_MAX  0x1f
+
+#define RED_PART(rgb)   ( ((rgb) & 0xF800) >> 11 )
+#define GREEN_PART(rgb) ( ((rgb) & 0x07E0) >>  5 )
+#define BLUE_PART(rgb)  ( ((rgb) & 0x001F)       )
+
+#define RGB565(r,g,b) ( ((r)<<11) | ((g)<<5) | (b) )
+
+
 class LogicPixel {
   public:
     LogicPixel(uint16_t x, uint16_t y)
