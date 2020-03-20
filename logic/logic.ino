@@ -32,6 +32,8 @@ static uint16_t circle_image[PIXEL_RADIUS+1][IMAGE_WIDTH];
 #include <MCUFRIEND_kbv.h>
 static MCUFRIEND_kbv screen;
 static void drawPixel(LogicPixel *pixel, uint16_t color) {
+  static uint16_t last_color = 0;
+
   if (color != RGB565_BLACK) {
     screen.setAddrWindow(pixel->x - PIXEL_RADIUS, pixel->y - PIXEL_RADIUS,
                          pixel->x + PIXEL_RADIUS, pixel->y + PIXEL_RADIUS);
@@ -39,12 +41,14 @@ static void drawPixel(LogicPixel *pixel, uint16_t color) {
     for (int8_t x = PIXEL_RADIUS; x >= 0; x--) {
       uint16_t *circle_image_x = circle_image[x];
 
-      // Replace color in image:
-      circle_image_x[PIXEL_RADIUS] = color;
-      for (uint8_t y = 1; y <= PIXEL_RADIUS; y++) {
-        if (!circle_image_x[PIXEL_RADIUS+y]) break;
-        circle_image_x[PIXEL_RADIUS+y] = color;
-        circle_image_x[PIXEL_RADIUS-y] = color;
+      if (last_color != color) {
+        // Replace color in image:
+        circle_image_x[PIXEL_RADIUS] = color;
+        for (uint8_t y = 1; y <= PIXEL_RADIUS; y++) {
+          if (!circle_image_x[PIXEL_RADIUS+y]) break;
+          circle_image_x[PIXEL_RADIUS+y] = color;
+          circle_image_x[PIXEL_RADIUS-y] = color;
+        }
       }
       
       screen.pushColors(circle_image_x, IMAGE_WIDTH, first);
@@ -53,6 +57,7 @@ static void drawPixel(LogicPixel *pixel, uint16_t color) {
     for (uint8_t x = 1; x <= PIXEL_RADIUS; x++) {
       screen.pushColors(circle_image[x], IMAGE_WIDTH, false);
     }
+    last_color = color;
   }
   else {
     screen.fillRect(pixel->x - PIXEL_RADIUS, pixel->y - PIXEL_RADIUS, IMAGE_WIDTH, IMAGE_WIDTH, RGB565_BLACK);
@@ -167,19 +172,9 @@ static inline void setupCircleImage(void) {
       circle_image_x[PIXEL_RADIUS-y] = 1;
     }
   }
-
-  for (uint8_t x = 0; x <= PIXEL_RADIUS; x++) {
-    uint16_t *circle_image_x = circle_image[x];
-    for (uint8_t y = 0; y < IMAGE_WIDTH; y++) {
-      Serial.print(circle_image_x[y]);
-    }
-    Serial.println();
-  }
 }
 
 void setup(void) {
-  Serial.begin(9600);
-    
   setupCircleImage();
   setupScreen();
 
@@ -190,12 +185,5 @@ static unsigned long total_millis = 0;
 static unsigned long count        = 0;
 
 void loop(void) {
-  unsigned long start = micros();
   panel.loop();
-  unsigned long time = micros() - start;
-  if (time >= 0) {
-    total_millis += time;
-    count++;
-    Serial.println(total_millis/count);
-  }
 }
